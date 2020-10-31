@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity() {
                 while (mediaRecorder != null) {
                     Thread.sleep(1000)
                     runOnUiThread {
-                        findViewById<TextView>(R.id.db).text = soundDb(10.0.pow(-7.0)).toString()
+                        findViewById<TextView>(R.id.db).text = String.format("%.2f", soundDb(10.0.pow(-7.0)).toString())
                     }
                 }
             }.start()
