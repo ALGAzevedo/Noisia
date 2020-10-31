@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Noisia</string>
+    <string name="Button_START">Start</string>
+    <string name="buttonStop">Stop</string>
+</resources>
