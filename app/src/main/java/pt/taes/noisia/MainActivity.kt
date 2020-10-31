@@ -6,6 +6,7 @@ import android.media.MediaRecorder
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -31,7 +32,16 @@ class MainActivity : AppCompatActivity() {
                 startRecording()
             }.start()
 
-            }
+            Thread{
+                while(mediaRecorder != null) {
+                    Thread.sleep(1000)
+                    runOnUiThread {
+                        findViewById<TextView>(R.id.db).text = mediaRecorder?.maxAmplitude.toString()
+                    }
+                }
+            }.start()
+
+        }
 
         findViewById<Button>(R.id.buttonStop).setOnClickListener {
             stopRecording()
