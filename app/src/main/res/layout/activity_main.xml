@@ -20,8 +20,8 @@
         android:id="@+id/buttonStop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="624dp"
-        android:layout_marginEnd="52dp"
+        android:layout_marginTop="484dp"
+        android:layout_marginEnd="48dp"
         android:text="@string/buttonStop"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -30,8 +30,8 @@
         android:id="@+id/buttonStart"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="52dp"
-        android:layout_marginTop="624dp"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="484dp"
         android:text="@string/Button_START"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

@@ -13,6 +13,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import java.io.IOException
 import kotlin.math.log10
+import kotlin.math.pow
 
 
 class MainActivity : AppCompatActivity() {
@@ -38,7 +39,7 @@ class MainActivity : AppCompatActivity() {
                 while (mediaRecorder != null) {
                     Thread.sleep(1000)
                     runOnUiThread {
-                        findViewById<TextView>(R.id.db).text = getAmplitudeEMA().toString()
+                        findViewById<TextView>(R.id.db).text = soundDb(10.0.pow(-7.0)).toString()
                     }
                 }
             }.start()
@@ -100,7 +101,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun soundDb(ampl: Double): Double {
-        return 20 * log10(getAmplitudeEMA() / ampl)
+        return 20 * log10(getAmplitude() / ampl)
     }
 
     private fun getAmplitude(): Double {
@@ -110,7 +111,7 @@ class MainActivity : AppCompatActivity() {
         return 0.0
     }
 
-    fun getAmplitudeEMA(): Double {
+    private fun getAmplitudeEMA(): Double {
         val amp = getAmplitude()
         mEMA = EMA_FILTER * amp + (1.0 - EMA_FILTER) * mEMA
         return mEMA
