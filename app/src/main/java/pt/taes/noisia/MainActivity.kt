@@ -12,7 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import java.io.IOException
-import java.lang.Exception
+import kotlin.math.log10
 
 
 class MainActivity : AppCompatActivity() {
@@ -20,6 +20,8 @@ class MainActivity : AppCompatActivity() {
 
     private var mediaRecorder: MediaRecorder? = null
     private var state: Boolean = false
+    private var mEMA = 0.0
+    private val EMA_FILTER = 0.6
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,15 +30,15 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.buttonStart).setOnClickListener {
 
-            Thread{
+            Thread {
                 startRecording()
             }.start()
 
-            Thread{
-                while(mediaRecorder != null) {
+            Thread {
+                while (mediaRecorder != null) {
                     Thread.sleep(1000)
                     runOnUiThread {
-                        findViewById<TextView>(R.id.db).text = mediaRecorder?.maxAmplitude.toString()
+                        findViewById<TextView>(R.id.db).text = getAmplitudeEMA().toString()
                     }
                 }
             }.start()
@@ -47,9 +49,8 @@ class MainActivity : AppCompatActivity() {
             stopRecording()
         }
 
-
-
     }
+
 
 
     private fun startRecording() {
@@ -97,5 +98,23 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "You are not recording right now!", Toast.LENGTH_SHORT).show()
         }
     }
+
+    fun soundDb(ampl: Double): Double {
+        return 20 * log10(getAmplitudeEMA() / ampl)
+    }
+
+    private fun getAmplitude(): Double {
+        if(mediaRecorder != null){
+            return mediaRecorder!!.maxAmplitude.toDouble()
+        }
+        return 0.0
+    }
+
+    fun getAmplitudeEMA(): Double {
+        val amp = getAmplitude()
+        mEMA = EMA_FILTER * amp + (1.0 - EMA_FILTER) * mEMA
+        return mEMA
+    }
+
 
 }
