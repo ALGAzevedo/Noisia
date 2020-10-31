@@ -59,15 +59,15 @@ class MainActivity : AppCompatActivity() {
                         Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(this,
                         Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 
-            val permissions = arrayOf(android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE)
+            val permissions = arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
             ActivityCompat.requestPermissions(this, permissions, 0)
         } else {
 
             mediaRecorder = MediaRecorder()
             mediaRecorder?.setAudioSource(MediaRecorder.AudioSource.MIC)
-            mediaRecorder?.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-            mediaRecorder?.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-            mediaRecorder?.setOutputFile("/dev/null");
+            mediaRecorder?.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+            mediaRecorder?.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+            mediaRecorder?.setOutputFile("/dev/null")
 
             try {
                 mediaRecorder?.prepare()
@@ -100,7 +100,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun soundDb(ampl: Double): Double {
+    private fun soundDb(ampl: Double): Double {
         return 20 * log10(getAmplitude() / ampl)
     }
 
