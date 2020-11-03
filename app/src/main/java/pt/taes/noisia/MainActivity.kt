@@ -7,20 +7,22 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import java.io.IOException
+import java.lang.Math.pow
 import kotlin.math.log10
 import kotlin.math.pow
+import kotlin.math.sqrt
 
 
 class MainActivity : AppCompatActivity() {
 
 
     private var mediaRecorder: MediaRecorder? = null
-    private var state: Boolean = false
+    private var isRunning: Boolean = false
+    private var runningThread : Thread? = null
     private var mEMA = 0.0
     private val EMA_FILTER = 0.6
 
@@ -33,17 +35,18 @@ class MainActivity : AppCompatActivity() {
 
             Thread {
                 startRecording()
-            }.start()
-
-            Thread {
-                while (mediaRecorder != null) {
-                    Thread.sleep(1000)
-                    runOnUiThread {
-                        findViewById<TextView>(R.id.db).text = String.format("%.2f", soundDb(10.0.pow(-7.0)).toString())
+                runningThread = Thread {
+                    while (isRunning) {
+                        Thread.sleep(500)
+                            runOnUiThread {
+                            findViewById<TextView>(R.id.db).text = String.format("%.1f", getDecibelsFromAmplitude()).toString() + " Db";
+//                            findViewById<TextView>(R.id.db).text = mediaRecorder!!.maxAmplitude.toDouble().toString();
+                        }
                     }
                 }
-            }.start()
 
+                runningThread?.start();
+            }.start()
         }
 
         findViewById<Button>(R.id.buttonStop).setOnClickListener {
@@ -53,21 +56,20 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
     private fun startRecording() {
         if (ContextCompat.checkSelfPermission(this,
                         Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(this,
                         Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 
-            val permissions = arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
+            val permissions = arrayOf(android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE)
             ActivityCompat.requestPermissions(this, permissions, 0)
         } else {
 
             mediaRecorder = MediaRecorder()
             mediaRecorder?.setAudioSource(MediaRecorder.AudioSource.MIC)
-            mediaRecorder?.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-            mediaRecorder?.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-            mediaRecorder?.setOutputFile("/dev/null")
+            mediaRecorder?.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+            mediaRecorder?.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+            mediaRecorder?.setOutputFile("/dev/null");
 
             try {
                 mediaRecorder?.prepare()
@@ -78,44 +80,49 @@ class MainActivity : AppCompatActivity() {
             }
             try {
                 mediaRecorder?.start()
-                state = true
+                isRunning = true
 
-                Toast.makeText(this, "Recording started!", Toast.LENGTH_SHORT).show()
+//                runOnUiThread {  Toast.makeText(this, "Recording started!", Toast.LENGTH_SHORT).show() }
             } catch (e: SecurityException) {
                 Log.e("[Monkey]", "SecurityException: " + Log.getStackTraceString(e))
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 Log.e("[Monkey]", "Exception: " + Log.getStackTraceString(e))
             }
         }
     }
 
 
-    private fun stopRecording(){
-        if(state){
+    private fun stopRecording() {
+        if (isRunning) {
+            isRunning = false
+            runningThread?.join();
             mediaRecorder?.stop()
             mediaRecorder?.release()
-            state = false
-        }else{
-            Toast.makeText(this, "You are not recording right now!", Toast.LENGTH_SHORT).show()
+            mediaRecorder = null
+        } else {
+//            runOnUiThread {  Toast.makeText(this, "You are not recording right now!", Toast.LENGTH_SHORT).show() }
         }
     }
 
-    private fun soundDb(ampl: Double): Double {
-        return 20 * log10(getAmplitude() / ampl)
+    private fun getDecibelsFromAmplitude(): Double {
+
+        val amp = getAmplitude()
+
+        if (amp == 0.0)
+            return 0.0;
+
+        return calculateDecibels(amp);
     }
 
     private fun getAmplitude(): Double {
-        if(mediaRecorder != null){
-            return mediaRecorder!!.maxAmplitude.toDouble()
-        }
-        return 0.0
+
+        if (mediaRecorder == null)
+            return 0.0
+
+        return mediaRecorder!!.maxAmplitude.toDouble()
     }
 
-    private fun getAmplitudeEMA(): Double {
-        val amp = getAmplitude()
-        mEMA = EMA_FILTER * amp + (1.0 - EMA_FILTER) * mEMA
-        return mEMA
+    private fun calculateDecibels(ampl: Double): Double {
+        return 20 * log10(ampl / 2.0.pow(-0.5));
     }
-
-
 }
